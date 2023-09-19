@@ -4,7 +4,7 @@
 echo "Welcome"
 
 menu=true
-while [["${menu}" == true]]
+while [[ "${menu}" == true ]];
 do
 echo "Please enter the number for the input you would like to see"
 echo "1. Get my ip address"
@@ -16,21 +16,23 @@ echo "6. Quit"
 
 read choice
 
-if [["${choice}" == '1']]
+if [[ "${choice}" == '1' ]];
 then
-  echo$(bash ip.bash)
-else if [["${choice}" == '2']]
+  bash ip.bash
+elif [[ "${choice}" == '2' ]];
 then
-  echo$(bash myipbinary.bash)
-else if [["${choice}" == '3']]
+  bash myipbinary.bash
+elif [[ "${choice}" == '3' ]];
 then
-  echo$(bash subnetmask.bash)
-else if [["${choice}" == '4']]
+  bash subnetmask.bash
+elif [[ "${choice}" == '4' ]];
 then
-  echo$(bash mynetworkbinary.bash)
-else if [["${choice}" == '5']]
+  bash mynetworkbinary.bash
+elif [[ "${choice}" == '5' ]];
 then
-  echo$(bash convbin2ip.bash)
+  bash convbin2ip.bash
 else
-  exit 1
+  menu=false
+fi
+
 done
