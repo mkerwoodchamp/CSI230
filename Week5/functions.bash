@@ -19,7 +19,7 @@ cat "${path}"| grep "${currDate}" | grep "${line}" | cut -d ' ' -f 1 | sort | un
 done<$input
 }
 
-function badClients ()
+function badclients ()
 {
 path="/var/log/apache2/access.log"
 currDate=$(date +"%d/%b/%Y:%H")
@@ -51,7 +51,56 @@ num=$(echo count | egrep 'HTTP/.*" 200' | cut -d ' ' -f 6 | sort | uniq -c)
 done<$input
 }
 
-listips
-visitors
-badClients
-histogram
+function block ()
+{
+path="/var/log/apache2/access.log"
+input="blacklisted.txt"
+
+while read -r line
+do
+ufw deny from "${line}"
+done<$input
+}
+
+function resetblock ()
+{
+ufw reset
+}
+
+menu=true
+while [[ "${menu}" == true ]]
+do
+echo "Please enter the input of what you would like to do: "
+echo "1. List ip addresses that have accesses the web page"
+echo "2. Count and list the clients that have accessed your page in the last day"
+echo "3. Count clients that got a bad response"
+echo "4. Show how many 200 requests were recieved each day"
+echo "5. Block users from option 3"
+echo "6. Reset the blocked users"
+echo "7. Quit"
+
+read choice
+
+if [[ "${choice}" == '1' ]]
+then
+	listips
+elif [[ "${choice}" == '2' ]]
+then
+	visitors
+elif [[ "${choice}" == '3' ]]
+then 
+	badclients
+elif [[ "${choice}" == '4' ]]
+then
+	histogram
+elif [[ "${choice}" == '5' ]]
+then
+	block
+elif [[ "${choice}" == '6' ]]
+then
+	resetblock
+else
+	menu=false
+fi
+
+done
