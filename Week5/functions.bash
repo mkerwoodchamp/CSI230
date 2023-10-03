@@ -24,12 +24,12 @@ function badclients ()
 path="/var/log/apache2/access.log"
 currDate=$(date +"%d/%b/%Y:%H")
 input="clientIPs.txt"
-content=(cat "path")
+content=$(cat "$path")
 
 while read -r line
 do
-count=$("${content}" | grep "${currDate}" | grep "${line}" | cut -d ' ' -f 1 | tr -d '] -')
-num=$(echo count | egrep 'HTTP/.*" [400-404]' | cut -d ' ' -f 6)
+count=$("$content" | egrep 'HTTP/.*" [400-404]' | cut -d ' ' -f 1 | tr -d '] -')
+num=$(echo "$count" | wc -l)
 if [[ $num -ge 3 ]]
 then
 echo $line >> blacklisted.txt
@@ -43,12 +43,12 @@ function histogram ()
 path="/var/log/apache2/access.log"
 currDate=$(date +"%d/%b/%Y:%H")
 input="clientIPs.txt"
-content=(cat "path")
+content=$(cat "$path")
 
 while read -r line
 do
-count=$("${content}" | grep "${currDate}" | grep "${line}" | cut -d ' ' -f 1 | tr -d '] -')
-num=$(echo count | egrep 'HTTP/.*" 200' | cut -d ' ' -f 6 | sort | uniq -c)
+count=$("$content" | grep "${currDate}" | grep "${line}" | cut -d ' ' -f 1 | tr -d '] -')
+num=$(echo "$count" | egrep 'HTTP/.*" 200' | wc -l | sort | uniq -c)
 done<$input
 }
 
@@ -85,24 +85,13 @@ read choice
 if [[ "${choice}" == '1' ]]
 then
 	listips
-	input="clientIPs.txt"
-	numips=0
-	while read -r line
-	do
-	numips+=1
-	done
-	echo "There are "${numips}" ip addresses"
+
 elif [[ "${choice}" == '2' ]]
 then
 	visitors
 elif [[ "${choice}" == '3' ]]
 then 
 	badclients
-	input="clientIPs.txt"
-	while read -r line
-	do
-	echo "${line}"
-	done
 elif [[ "${choice}" == '6' ]]
 then
 	histogram
@@ -114,8 +103,11 @@ elif [[ "${choice}" == '5' ]]
 then
 	resetblock
 	iptables -L INPUT -v -n
-else
+elif [[ "${choice}" == '7' ]]
+then
 	menu=false
+else
+	echo "Please enter a valid choice"
 fi
 
 done
