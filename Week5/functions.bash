@@ -33,6 +33,7 @@ num=$(echo count | egrep 'HTTP/.*" [400-404]' | cut -d ' ' -f 6)
 if [[ $num -ge 3 ]]
 then
 echo $line >> blacklisted.txt
+echo $line
 fi
 done<$input
 }
@@ -58,25 +59,25 @@ input="blacklisted.txt"
 
 while read -r line
 do
-ufw deny from "${line}"
+iptables -A INPUT -s "${line}" -j DROP
 done<$input
 }
 
 function resetblock ()
 {
-ufw reset
+iptables -F
 }
 
 menu=true
 while [[ "${menu}" == true ]]
 do
 echo "Please enter the input of what you would like to do: "
-echo "1. List ip addresses that have accesses the web page"
-echo "2. Count and list the clients that have accessed your page in the last day"
-echo "3. Count clients that got a bad response"
-echo "4. Show how many 200 requests were recieved each day"
-echo "5. Block users from option 3"
-echo "6. Reset the blocked users"
+echo "1. Number of Visitors"
+echo "2. Display Visitors"
+echo "3. Show Bad Visits"
+echo "4. Block Bad Visits"
+echo "5. Reset Block Rules"
+echo "6. Show Visit Histogram"
 echo "7. Quit"
 
 read choice
@@ -84,21 +85,35 @@ read choice
 if [[ "${choice}" == '1' ]]
 then
 	listips
+	input="clientIPs.txt"
+	numips=0
+	while read -r line
+	do
+	numips+=1
+	done
+	echo "There are "${numips}" ip addresses"
 elif [[ "${choice}" == '2' ]]
 then
 	visitors
 elif [[ "${choice}" == '3' ]]
 then 
 	badclients
-elif [[ "${choice}" == '4' ]]
-then
-	histogram
-elif [[ "${choice}" == '5' ]]
-then
-	block
+	input="clientIPs.txt"
+	while read -r line
+	do
+	echo "${line}"
+	done
 elif [[ "${choice}" == '6' ]]
 then
+	histogram
+elif [[ "${choice}" == '4' ]]
+then
+	block
+	iptables -L INPUT -v -n
+elif [[ "${choice}" == '5' ]]
+then
 	resetblock
+	iptables -L INPUT -v -n
 else
 	menu=false
 fi
